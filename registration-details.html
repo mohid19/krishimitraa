@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Details - North East Krishi Mitra</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="registration-page">
+
+    <header>
+        <div class="logo">
+            <img src="logo-header.png" alt="North East Krishi Mitra logo">
+            <h1>Krishi Mitra</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="registration-details.html" class="login-btn">Login / Register</a></li>
+            </ul>
+        </nav>
+        <div class="language-select">
+            <select>
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="local">Local</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="auth-section">
+        <h2>Registration Page</h2>
+        <div class="auth-card">
+            <h3>Enter Your Details</h3>
+            <form class="details-form" novalidate>
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email ID" pattern="^[^\s@]+@[^\s@]+\.[^\s@]{2,}$" title="Enter a valid email with @ and domain (example: user@gmail.com)" required>
+                <input type="tel" name="mobile" placeholder="Mobile Number" pattern="[0-9]{10}" minlength="10" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" title="Enter exactly 10 digits (numbers only)" required>
+                <input type="password" name="password" placeholder="Password" minlength="6" title="Password must be at least 6 characters." required>
+                <input type="password" name="confirmPassword" placeholder="Confirm Password" minlength="6" required>
+                <textarea name="address" placeholder="Address" rows="4" required></textarea>
+                <div class="auth-actions">
+                    <button type="submit" class="primary">Generate OTP</button>
+                    <a href="mobile-login.html" class="secondary auth-link-button">Login</a>
+                </div>
+                <div class="otp-section" id="otp-section" style="display:none;">
+                    <input type="text" name="otp" id="otp-input" placeholder="Enter OTP" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{4,6}" title="Enter the OTP digits">
+                    <div class="auth-actions" style="margin-top:10px;">
+                        <button type="button" class="primary" id="verify-otp-btn">Verify OTP</button>
+                    </div>
+                </div>
+                <p class="auth-message" id="register-message"></p>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 North East Krishi Mitra. All rights reserved.</p>
+        <p>Empowering the farming community for a better tomorrow.</p>
+    </footer>
+
+    <script>
+        const detailsForm = document.querySelector(".details-form");
+        const emailInput = detailsForm.querySelector('input[name="email"]');
+        const mobileInput = detailsForm.querySelector('input[name="mobile"]');
+        const passwordInput = detailsForm.querySelector('input[name="password"]');
+        const confirmPasswordInput = detailsForm.querySelector('input[name="confirmPassword"]');
+        const nameInput = detailsForm.querySelector('input[name="name"]');
+        const registerMessage = document.getElementById("register-message");
+        const otpSection = document.getElementById("otp-section");
+        const otpInput = document.getElementById("otp-input");
+        const verifyOtpBtn = document.getElementById("verify-otp-btn");
+        const API_BASE = "http://127.0.0.1:5000/api/auth";
+
+        function setMessage(message, isError) {
+            registerMessage.textContent = message;
+            registerMessage.classList.remove("error", "success");
+            registerMessage.classList.add(isError ? "error" : "success");
+        }
+
+        emailInput.addEventListener("input", () => {
+            emailInput.setCustomValidity("");
+            setMessage("", false);
+        });
+
+        mobileInput.addEventListener("input", () => {
+            mobileInput.setCustomValidity("");
+            setMessage("", false);
+        });
+
+        passwordInput.addEventListener("input", () => {
+            passwordInput.setCustomValidity("");
+            confirmPasswordInput.setCustomValidity("");
+            setMessage("", false);
+        });
+
+        confirmPasswordInput.addEventListener("input", () => {
+            confirmPasswordInput.setCustomValidity("");
+            setMessage("", false);
+        });
+
+        detailsForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+            const mobilePattern = /^[0-9]{10}$/;
+
+            emailInput.setCustomValidity("");
+            mobileInput.setCustomValidity("");
+            passwordInput.setCustomValidity("");
+            confirmPasswordInput.setCustomValidity("");
+            setMessage("", false);
+
+            if (!emailPattern.test(emailInput.value.trim())) {
+                emailInput.setCustomValidity("Please enter a valid email (must include @ and domain).");
+            }
+
+            if (!mobilePattern.test(mobileInput.value.trim())) {
+                mobileInput.setCustomValidity("Please enter exactly 10 digits for mobile number.");
+            }
+
+            if (passwordInput.value.length < 6) {
+                passwordInput.setCustomValidity("Password must be at least 6 characters.");
+            }
+
+            if (passwordInput.value !== confirmPasswordInput.value) {
+                confirmPasswordInput.setCustomValidity("Password and Confirm Password must match.");
+            }
+
+            if (!detailsForm.checkValidity()) {
+                detailsForm.reportValidity();
+                return;
+            }
+
+            try {
+                // Show OTP input immediately after clicking Generate OTP
+                otpSection.style.display = "block";
+                otpInput.value = "";
+
+                const response = await fetch(`${API_BASE}/register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        name: nameInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        mobile: mobileInput.value.trim(),
+                        password: passwordInput.value,
+                    }),
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Registration failed.");
+                }
+
+                otpInput.focus();
+                setMessage("OTP sent. Please enter the OTP to verify.", false);
+            } catch (error) {
+                setMessage(error.message, true);
+            }
+        });
+
+        verifyOtpBtn.addEventListener("click", async () => {
+            const otp = (otpInput.value || "").trim();
+            if (!otp) {
+                setMessage("Please enter OTP.", true);
+                otpInput.focus();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/verify-otp`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        mobile: mobileInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        otp,
+                    }),
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "OTP verification failed.");
+                }
+
+                setMessage("OTP verified successfully. You can now login.", false);
+                detailsForm.reset();
+                otpSection.style.display = "none";
+            } catch (error) {
+                setMessage(error.message, true);
+            }
+        });
+    </script>
+
+</body>
+</html>

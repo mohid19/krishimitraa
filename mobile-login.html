@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Login - North East Krishi Mitra</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="logo-header.png" alt="North East Krishi Mitra logo">
+            <h1>Krishi Mitra</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="registration-details.html" class="login-btn">Login / Register</a></li>
+            </ul>
+        </nav>
+        <div class="language-select">
+            <select>
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="local">Local</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="auth-section">
+        <h2>Login Page</h2>
+        <div class="auth-card">
+            <h3>Login with Mobile Number</h3>
+            <form class="mobile-login-form" action="#" method="post" novalidate>
+                <input type="tel" name="mobile" placeholder="Mobile Number" pattern="[0-9]{10}" minlength="10" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,10)" title="Enter exactly 10 digits (numbers only)" required>
+                <input type="password" name="password" placeholder="Password" minlength="6" required>
+                <div class="auth-actions">
+                    <button type="submit" class="primary">Login</button>
+                </div>
+                <p class="auth-message" id="login-message"></p>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 North East Krishi Mitra. All rights reserved.</p>
+        <p>Empowering the farming community for a better tomorrow.</p>
+    </footer>
+
+    <script>
+        const loginForm = document.querySelector(".mobile-login-form");
+        const mobileInput = loginForm.querySelector('input[name="mobile"]');
+        const passwordInput = loginForm.querySelector('input[name="password"]');
+        const loginMessage = document.getElementById("login-message");
+        const API_BASE = "http://127.0.0.1:5000/api/auth";
+
+        function setMessage(message, isError) {
+            loginMessage.textContent = message;
+            loginMessage.classList.remove("error", "success");
+            loginMessage.classList.add(isError ? "error" : "success");
+        }
+
+        mobileInput.addEventListener("input", () => {
+            mobileInput.setCustomValidity("");
+            setMessage("", false);
+        });
+
+        passwordInput.addEventListener("input", () => {
+            passwordInput.setCustomValidity("");
+            setMessage("", false);
+        });
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const mobilePattern = /^[0-9]{10}$/;
+            mobileInput.setCustomValidity("");
+            passwordInput.setCustomValidity("");
+            setMessage("", false);
+
+            if (!mobilePattern.test(mobileInput.value.trim())) {
+                mobileInput.setCustomValidity("Please enter exactly 10 digits for mobile number.");
+            }
+
+            if (passwordInput.value.trim().length < 6) {
+                passwordInput.setCustomValidity("Password must be at least 6 characters.");
+            }
+
+            if (!loginForm.checkValidity()) {
+                loginForm.reportValidity();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        mobile: mobileInput.value.trim(),
+                        password: passwordInput.value,
+                    }),
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || "Login failed.");
+                }
+
+                setMessage("Login successful. Mobile number and password matched registration.", false);
+            } catch (error) {
+                setMessage(error.message, true);
+            }
+        });
+    </script>
+
+</body>
+</html>

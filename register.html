@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - North East Krishi Mitra</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="logo-header.png" alt="North East Krishi Mitra logo">
+            <h1>Krishi Mitra</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="registration-details.html" class="login-btn">Login / Register</a></li>
+            </ul>
+        </nav>
+        <div class="language-select">
+            <select>
+                <option value="en">English</option>
+                <option value="hi">हिन्दी</option>
+                <option value="local">Local</option>
+            </select>
+        </div>
+    </header>
+
+    <main class="auth-section">
+        <h2>Create New Account</h2>
+        <div id="auth-root" data-auth-mode="register"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 North East Krishi Mitra. All rights reserved.</p>
+        <p>Empowering the farming community for a better tomorrow.</p>
+    </footer>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel" src="auth-app.jsx"></script>
+
+</body>
+</html>
